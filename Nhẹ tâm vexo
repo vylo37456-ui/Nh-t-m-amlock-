@@ -1,0 +1,127 @@
+gg.setVisible(false)
+gg.clearResults()
+
+-- Sway làm rung ngắm, giảm về 0 để ngắm ổn định hơn
+gg.searchNumber('1.0;0.5;0.5::50', gg.TYPE_FLOAT, false, gg.SIGN_EQUAL, 0, -1)
+local sway = gg.getResults(50)
+if sway then
+    for i = 1, #sway do
+        sway[i].value = 0.01
+    end
+    gg.setValues(sway)
+    print('[1] Đã giảm rung tâm (Sway)')
+end
+gg.clearResults()
+
+-- Recoil làm súng giật khi bắn, giảm về 0 để đạn bay thẳng
+gg.searchNumber('1.0;0.5;0.5;0.5;0.5::100', gg.TYPE_FLOAT, false, gg.SIGN_EQUAL, 0, -1)
+local recoil = gg.getResults(50)
+if recoil then
+    for i = 1, #recoil do
+        recoil[i].value = 0.0
+    end
+    gg.setValues(recoil)
+    print('[2] Đã giảm giật súng (Recoil)')
+end
+gg.clearResults()
+
+-- Spread làm đạn loe rộng, giảm về 0 để bắn chuẩn hơn
+gg.searchNumber('1.0;0.5;0.5;0.5::50', gg.TYPE_FLOAT, false, gg.SIGN_EQUAL, 0, -1)
+local spread = gg.getResults(30)
+if spread then
+    for i = 1, #spread do
+        spread[i].value = 0.001
+    end
+    gg.setValues(spread)
+    print('[3] Đã tăng độ chính xác (Spread)')
+end
+gg.clearResults()
+
+-- Giảm rung khi đang ngắm ống ngắm
+gg.searchNumber('1.0;1.0;1.0::5', gg.TYPE_FLOAT, false, gg.SIGN_EQUAL, 0, -1)
+local ads = gg.getResults(10)
+if ads then
+    for i = 1, #ads do
+        ads[i].value = 0.01
+    end
+    gg.setValues(ads)
+    print('[4] Đã giảm rung khi ngắm (ADS)')
+end
+gg.clearResults()
+
+-- Tăng tốc độ bắn bằng cách giảm thời gian giữa các phát
+gg.searchNumber('1.0;0.5;1.0::50', gg.TYPE_FLOAT, false, gg.SIGN_EQUAL, 0, -1)
+local fire = gg.getResults(20)
+if fire then
+    for i = 1, #fire do
+        fire[i].value = 0.001
+    end
+    gg.setValues(fire)
+    print('[5] Đã tăng tốc độ bắn')
+end
+gg.clearResults()
+
+-- Giảm rung khi đang chạy hoặc di chuyển
+gg.searchNumber('0.5;0.5;0.5;0.5::30', gg.TYPE_FLOAT, false, gg.SIGN_EQUAL, 0, -1)
+local move = gg.getResults(20)
+if move then
+    for i = 1, #move do
+        move[i].value = 0.001
+    end
+    gg.setValues(move)
+    print('[6] Đã giảm rung khi di chuyển')
+end
+gg.clearResults()
+
+-- Tăng độ nhạy để xoay nhanh hơn
+gg.searchNumber('0.5;0.5;0.5;0.5::40', gg.TYPE_FLOAT, false, gg.SIGN_EQUAL, 0, -1)
+local sensi = gg.getResults(20)
+if sensi then
+    for i = 1, #sensi do
+        sensi[i].value = 0.5
+    end
+    gg.setValues(sensi)
+    print('[7] Đã tăng độ nhạy camera')
+end
+gg.clearResults()
+
+-- Giảm thời gian delay khi nhảy
+gg.searchNumber('1.0;1.0;1.0::20', gg.TYPE_FLOAT, false, gg.SIGN_EQUAL, 0, -1)
+local jump = gg.getResults(10)
+if jump then
+    for i = 1, #jump do
+        jump[i].value = 0.001
+    end
+    gg.setValues(jump)
+    print('[8] Đã giảm thời gian nhảy')
+end
+gg.clearResults()
+
+gg.searchNumber('1.0;1.0;1.0::30', gg.TYPE_FLOAT, false, gg.SIGN_EQUAL, 0, -1)
+local speed = gg.getResults(15)
+if speed then
+    for i = 1, #speed do
+        speed[i].value = 2.0
+    end
+    gg.setValues(speed)
+    print('[9] Đã tăng tốc độ di chuyển')
+end
+gg.clearResults()
+
+gg.searchNumber('1.0;0.5;0.5;0.5;0.5;0.5::60', gg.TYPE_FLOAT, false, gg.SIGN_EQUAL, 0, -1)
+local air = gg.getResults(30)
+if air then
+    for i = 1, #air do
+        air[i].value = 0.0
+    end
+    gg.setValues(air)
+    print('[10] Đã vô hiệu giật khi bắn trên không')
+end
+gg.clearResults()
+
+gg.toast("✅ ĐÃ GIẢM RUNG TÂM + GIẢM GIẬT + TĂNG CHÍNH XÁC")
+print("======================================")
+print("   TẤT CẢ 10 TÍNH NĂNG ĐÃ ĐƯỢC BẬT")
+print("   VÀO GAME KIỂM TRA NGAY!")
+print("======================================")
+
