@@ -1,0 +1,128 @@
+#include <windows.h>
+#include <d3d9.h>
+#include <d3dx9.h>
+#include <cmath>
+#include <vector>
+#include <thread>
+#include <chrono>
+
+#pragma comment(lib, "d3d9.lib")
+#pragma comment(lib, "d3dx9.lib")
+#pragma comment(lib, "winmm.lib")
+
+using namespace std;
+
+struct Vector3 {
+    float x, y, z;
+    Vector3() : x(0), y(0), z(0) {}
+    Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
+    float Distance(const Vector3& other) {
+        return sqrtf(powf(x - other.x, 2) + powf(y - other.y, 2) + powf(z - other.z, 2));
+    }
+};
+
+struct Player {
+    Vector3 head;
+    Vector3 position;
+    float health;
+    bool alive;
+    bool enemy;
+};
+
+vector<Player> players;
+Vector3 localPlayerPos;
+bool aimlockEnabled = true;
+bool noRecoilEnabled = true;
+float aimFov = 30.0f;
+float smoothFactor = 0.5f;
+
+float CalcYaw(const Vector3& from, const Vector3& to) {
+    float dx = to.x - from.x;
+    float dy = to.y - from.y;
+    float dz = to.z - from.z;
+    return atan2f(dy, dx) * 180.0f / 3.14159265f;
+}
+
+float CalcPitch(const Vector3& from, const Vector3& to) {
+    float dx = to.x - from.x;
+    float dy = to.y - from.y;
+    float dz = to.z - from.z;
+    float hyp = sqrtf(dx*dx + dz*dz);
+    return -atan2f(dy, hyp) * 180.0f / 3.14159265f;
+}
+
+Player GetBestTarget() {
+    Player best;
+    float bestScore = 9999.0f;
+    for (auto& p : players) {
+        if (!p.alive || !p.enemy) continue;
+        float dist = localPlayerPos.Distance(p.position);
+        float yaw = CalcYaw(localPlayerPos, p.head);
+        float score = yaw + (dist / 1000.0f);
+        if (score < bestScore) {
+            bestScore = score;
+            best = p;
+        }
+    }
+    return best;
+}
+
+typedef HRESULT(WINAPI* EndScene_t)(IDirect3DDevice9*);
+EndScene_t oEndScene = NULL;
+
+HRESULT WINAPI hkEndScene(IDirect3DDevice9* pDevice) {
+
+    if (aimlockEnabled) {
+        Player target = GetBestTarget();
+        if (target.alive) {
+            float yaw = CalcYaw(localPlayerPos, target.head);
+            float pitch = CalcPitch(localPlayerPos, target.head);
+            // Ghi vào bộ nhớ game (cần offset thực tế)
+            // *(float*)(gameBase + 0xVIEW_ANGLES) = yaw;
+            // *(float*)(gameBase + 0xVIEW_ANGLES + 4) = pitch;
+        }
+    }
+
+
+    if (noRecoilEnabled) {
+        // Ghi giá trị 0 vào offset recoil
+        // *(float*)(weaponBase + 0xRECOIL) = 0.0f;
+    }
+
+    return oEndScene(pDevice);
+}
+
+void SetupHook() {
+    // Tìm địa chỉ EndScene trong DirectX 9
+    // Cần tạo IDirect3D9 và IDirect3DDevice9 để lấy vtable
+    // Đây là code giả lập, thực tế cần pattern scan
+    oEndScene = (EndScene_t)0x00000000; // Thay bằng địa chỉ thực tế
+    // DetourTransactionBegin();
+    // DetourAttach(&(PVOID&)oEndScene, hkEndScene);
+    // DetourTransactionCommit();
+}
+
+void MainLoop() {
+    while (true) {
+        // Cập nhật danh sách người chơi (cần đọc bộ nhớ)
+        // players = ReadPlayerList();
+        // localPlayerPos = ReadLocalPlayer();
+
+        this_thread::sleep_for(chrono::milliseconds(16));
+    }
+}
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved) {
+    if (reason == DLL_PROCESS_ATTACH) {
+        DisableThreadLibraryCalls(hModule);
+        AllocConsole();
+        freopen("CONOUT$", "w", stdout);
+        printf("[AIMLOCK PC] Khoi tao...\n");
+
+        SetupHook();
+        CreateThread(NULL, 0, [](LPVOID) -> DWORD { MainLoop(); return 0; }, NULL, 0, NULL);
+
+        printf("[AIMLOCK mobile] Da san sang!\n");
+    }
+    return TRUE;
+}

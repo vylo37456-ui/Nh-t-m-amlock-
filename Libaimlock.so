@@ -1,0 +1,58 @@
+#include <jni.h>
+#include <string>
+#include <android/log.h>
+#include <dlfcn.h>
+#include <substrate.h>   // Hoặc Dobby
+
+#define LOG_TAG "AimLockColor"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+
+uintptr_t gameBase = 0;
+bool aimEnabled = true;
+bool colorEnabled = true;
+
+// Offsets giả định (cần tìm bằng IDA)
+#define OFFSET_WEAPON_COLOR 0x00ABCDEF  // Địa chỉ màu súng
+#define OFFSET_SET_VIEW    0x00FEDCBA
+
+// Hàm thay đổi màu súng
+void SetWeaponColor(uint32_t color) {
+    if (gameBase == 0) return;
+    uintptr_t addr = gameBase + OFFSET_WEAPON_COLOR;
+    // Ghi giá trị màu (ARGB) vào bộ nhớ
+    // Cần dùng mprotect để thay đổi quyền ghi
+    *(uint32_t*)addr = color;
+}
+
+// Hook aimlock
+typedef void (*SetViewAngles_t)(float, float);
+SetViewAngles_t oSetViewAngles = nullptr;
+
+void hkSetViewAngles(float pitch, float yaw) {
+    if (aimEnabled) {
+        // Logic aimlock
+        // Đổi màu súng sang đỏ khi khóa
+        SetWeaponColor(0xFFFF0000); // Đỏ
+    } else {
+        SetWeaponColor(0xFFFFFFFF); // Trắng (gốc)
+    }
+    oSetViewAngles(pitch, yaw);
+}
+
+// Khởi tạo
+void Init() {
+    void* handle = dlopen("libil2cpp.so", RTLD_LAZY);
+    if (handle) {
+        gameBase = (uintptr_t)handle;
+        LOGI("Game base: 0x%lx", gameBase);
+        oSetViewAngles = (SetViewAngles_t)(gameBase + OFFSET_SET_VIEW);
+        MSHookFunction((void*)oSetViewAngles, (void*)hkSetViewAngles, NULL);
+        LOGI("Hook thanh cong!");
+    }
+}
+
+extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
+    LOGI("Module loaded");
+    Init();
+    return JNI_VERSION_1_6;
+}

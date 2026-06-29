@@ -1,0 +1,34 @@
+gg.require('1.0.0')
+
+local function aimlock()
+    local sensitivity = gg.searchNumber('0.5', gg.TYPE_FLOAT)
+    if sensitivity then
+        gg.editAll('0.001', gg.TYPE_FLOAT)
+        print('Đã giảm độ nhạy để khóa tâm mượt hơn')
+    end
+
+    local recoil = gg.searchNumber('1.0', gg.TYPE_FLOAT)
+    if recoil then
+        gg.editAll('0.0', gg.TYPE_FLOAT)
+        print('Đã vô hiệu hóa giật')
+    end
+
+    local sway = gg.searchNumber('1.0', gg.TYPE_FLOAT)
+    if sway then
+        gg.editAll('0.0', gg.TYPE_FLOAT)
+        print('Đã giảm rung tâm')
+    end
+end
+
+print('===== AM CỔ FF =====')
+print('1. Bật Aimlock + No Recoil')
+print('2. Tắt (reset về giá trị gốc)')
+
+local choice = gg.choice({'Bật', 'Tắt'}, nil, 'Chọn chức năng')
+if choice == 1 then
+    aimlock()
+    print('Đã bật thành công! Vào game kiểm tra.')
+elseif choice == 2 then
+  
+    print('Đã tắt. Khởi động lại game để áp dụng.')
+end
